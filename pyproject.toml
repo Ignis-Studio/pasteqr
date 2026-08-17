@@ -1,0 +1,20 @@
+[project]
+name = "pasteqr"
+version = "0.1.0"
+description = "cli剪贴板二维码开链接"
+readme = "README.md"
+authors = [
+    { name = "Zhengyuan Huang", email = "neclyon@qq.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "pillow>=12.3.0",
+    "zxing-cpp>=3.1.1",
+]
+
+[project.scripts]
+pasteqr = "pasteqr:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
