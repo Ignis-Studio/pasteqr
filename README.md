@@ -1,33 +1,24 @@
 # pasteqr
 
-剪贴板二维码一键开链接的小工具。
+Paste and scan it.
 
-## 用法
+## Usage
 
 ```bash
 uv run pasteqr
 ```
 
-运行后出现 `paste> ` 提示符：
+1. Copy the QR code image or its path, press Enter.
+2. Paste the image.
+3. Paste the QR code's path and press Enter.
 
-1. 把二维码图片复制进剪贴板（截图、浏览器右键复制图片都行），然后按回车；
-2. 或者直接把图片文件路径粘贴进来再回车，两种方式都支持。
+`Ctrl-C` to exit.
 
-识别结果：
+## Requirements
 
-- 只有一个二维码 → 直接用系统默认浏览器打开链接；
-- 有多个二维码 → 一行一个列出序号和链接，输入序号打开对应链接。
+- `wl-clipboard` under Wayland or `xclip` under X11.
+- `xdg-utils`(Mostly contained by your Distro or DE)
 
-按 `Ctrl-C` 退出。
+Under the Apache 2.0 License.
 
-## 依赖
-
-- `uv`（包管理）
-- Wayland 下需要 `wl-clipboard`（提供 `wl-paste`）；X11 下需要 `xclip`
-- `xdg-utils`（提供 `xdg-open`，一般桌面环境自带）
-
-## 原理
-
-- `wl-paste --type image/png` / `xclip` 从剪贴板读图片
-- Pillow 读取图片字节，`zxing-cpp` 解码多个二维码（小图自动 2x 放大兜底）
-- `xdg-open` 打开链接
+By: Zhengyuan Huang <neclyon@qq.com>

@@ -21,7 +21,7 @@ fn clipboard_image_bytes() -> Option<Vec<u8>> {
             }
         }
     }
-    // X11 兜底
+    // X11 
     if let Ok(out) = Command::new("xclip")
         .args(["-selection", "clipboard", "-t", "image/png", "-o"])
         .output()
@@ -82,7 +82,7 @@ fn decode_qr(data: &[u8]) -> Vec<String> {
         .unwrap_or_default();
     collect(results, &mut seen, &mut out);
 
-    // 小图或没解出来时，2x 放大再试（NEAREST 保持二维码像素锐利）
+    // When failed or small image, scale 2x and try again (NEAREST keep the figure sharp)
     if out.is_empty() && w * h < 4_000_000 {
         let big = image::imageops::resize(&gray, w * 2, h * 2, image::imageops::FilterType::Nearest);
         let (bw, bh) = big.dimensions();
@@ -140,9 +140,9 @@ impl ExpandUser for Path {
 }
 
 fn main() {
-    eprintln!("把二维码图片复制到剪贴板后按回车，或直接粘贴图片路径；Ctrl-C 退出");
+    eprintln!("Copy the QR image and press Enter, or paste it here.");
     loop {
-        let resp = match read_line("paste> ") {
+        let resp = match read_line("pasteqr > ") {
             Ok(s) => s,
             Err(_) => {
                 eprintln!();
@@ -150,19 +150,19 @@ fn main() {
             }
         };
 
-        // 优先把用户输入当图片文件路径读
+        // Treat the user input as file path
         let mut data = if !resp.is_empty() {
             read_image_file(&resp)
         } else {
             None
         };
 
-        // 回退到剪贴板图片
+        // If the file failed, read the latest clipboard item as image
         if data.is_none() {
             data = clipboard_image_bytes();
         }
 
-        // 再兜底：剪贴板文本可能是文件路径
+        // Read clipboard item as path
         if data.is_none() {
             if let Some(text) = clipboard_text() {
                 let path_str = text.strip_prefix("file://").unwrap_or(&text);
@@ -173,24 +173,25 @@ fn main() {
             }
         }
 
+        // 3 failed, GG
         let data = match data {
             Some(d) => d,
             None => {
-                eprintln!("剪贴板里没有图片，也没找到文件路径");
+                eprintln!("Nothing to do.");
                 continue;
             }
         };
 
         let urls = decode_qr(&data);
         if urls.is_empty() {
-            eprintln!("没识别到二维码");
+            eprintln!("No QR detected.");
             continue;
         }
 
         if urls.len() == 1 {
-            println!("打开: {}", urls[0]);
+            println!("Opening {}", urls[0]);
             if !open_url(&urls[0]) {
-                eprintln!("xdg-open 不可用");
+                eprintln!("xdg-open is not available.");
             }
             continue;
         }
@@ -207,10 +208,10 @@ fn main() {
         };
         match sel.parse::<usize>() {
             Ok(idx) if idx >= 1 && idx <= urls.len() => {
-                println!("打开 #{}: {}", idx, urls[idx - 1]);
+                println!("Open #{}: {}", idx, urls[idx - 1]);
                 open_url(&urls[idx - 1]);
             }
-            _ => eprintln!("无效输入，跳过"),
+            _ => eprintln!("Invalid selection. Aborted."),
         }
     }
 }
