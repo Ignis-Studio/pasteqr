@@ -5,7 +5,7 @@ Paste and scan it.
 ## Usage
 
 ```bash
-uv run pasteqr
+./pasteqr
 ```
 
 1. Copy the QR code image or its path, press Enter.
